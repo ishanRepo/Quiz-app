@@ -5,6 +5,9 @@ const progressText = document.getElementById("progressText");
 const scoreText = document.getElementById("score");
 const progressBarFull = document.getElementById("progressBarFull");
 
+const loader = document.getElementById('loader');
+const game = document.getElementById('game');
+
 let currentQuestion = {};
 let acceptingAnswers = true;
 let score = 0;
@@ -13,12 +16,30 @@ let availableQuestions = [];
 
 let questions = [];
 
-fetch('question.json')
+//fetch() api to access external json
+fetch('https://opentdb.com/api.php?amount=10&category=18&difficulty=hard&type=multiple')
     .then((res) => {
         return res.json();
     })
     .then((loadedQuestions) => {
-        questions = loadedQuestions;
+        questions = loadedQuestions.results.map((loadedQuestion) =>{
+            const formattedQuestion = {
+                question: loadedQuestion.question,
+            };
+            const answerChoices =[...loadedQuestion.incorrect_answers];
+            formattedQuestion.answer = Math.floor(Math.random() * 4) + 1;
+            answerChoices.splice(
+                formattedQuestion.answer - 1,
+                0,
+                loadedQuestion.correct_answer
+            );
+
+            answerChoices.forEach((choice, index) => {
+                formattedQuestion['choice' + (index + 1)] = choice;
+            });
+
+            return formattedQuestion;
+        });
         startGame();
     })
     .catch((err) => {
@@ -33,12 +54,16 @@ startGame = () => { //arrow function
     score = 0;
     availableQuestions = [...questions]; //spread operator in js
     getNewQuestion();
+    //after we get new question remove hidden
+    //add hidden to loader
+    game.classList.remove('hidden');
+    loader.classList.add('hidden');
 }
 getNewQuestion = () => {
     if (availableQuestions.length === 0 || questionCounter >= MAX_QUESTIONS) {
         localStorage.setItem("mostRecentScore", score);
         //go to the end page
-        return window.location.assign('/end.html');
+        return window.location.assign('end.html');
     }
     questionCounter++;
     /*

@@ -25,7 +25,7 @@ saveHighScore = (e) => {
     highScores.splice(5);   // as we need to 5 scores
 
     localStorage.setItem("highScores", JSON.stringify(highScores));
-    window.location.assign("/");    //after we save going to home.\
+    window.location.assign("index.html");    //after we save going to home.\
     
 };
 
